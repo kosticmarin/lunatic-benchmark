@@ -1,0 +1,17 @@
+[package]
+name = "lunatic-bench"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lunatic = "0.10.5"
+serde = { version = "1.0", features = ["derive"] }
+rand = "0.8.5"
+hdrhistogram = { version = "7.2", default-features = false }
+clap = { version = "3.2", features = ["derive"] }
+
+[[bin]]
+name = "multiple"
+
+[[bin]]
+name = "single"
