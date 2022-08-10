@@ -8,6 +8,8 @@ trap_ctrlc()
         exit
 }
 
+trap trap_ctrlc SIGHUP SIGINT SIGTERM
+
 cargo b --release
 
 echo "Starting control node"
@@ -24,8 +26,5 @@ sleep 1
 BINARY=$2
 lunatic --control 127.0.0.1:10410 --node 127.0.0.1:20000 --test-ca "target/wasm32-wasi/release/$BINARY.wasm" -- ${@:3} &
 PID=$!
-
-trap trap_ctrlc SIGHUP SIGINT SIGTERM
-
-tail --pid=$PID -f /dev/null
+wait $PID
 killall lunatic

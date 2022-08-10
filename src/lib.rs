@@ -1,4 +1,5 @@
 use std::str::FromStr;
+use std::time::{SystemTime, UNIX_EPOCH};
 use std::{num::ParseIntError, time::Duration};
 
 use hdrhistogram::Histogram;
@@ -136,4 +137,15 @@ pub fn parse_byte_size(s: &str) -> Result<u64, ParseIntError> {
     let base: u64 = u64::from_str(s)?;
 
     Ok(base * multiplier)
+}
+
+pub fn get_epoch_secs() -> f64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs_f64()
+}
+
+pub fn duration_from_epochs(t1: f64, t2: f64) -> Duration {
+    Duration::from_secs_f64(t2 - t1)
 }

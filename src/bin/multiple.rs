@@ -2,7 +2,9 @@ use std::time::Instant;
 
 use clap::Parser;
 use lunatic::{spawn, Mailbox, Process};
-use lunatic_bench::{parse_byte_size, ClientStats, TransferResult};
+use lunatic_bench::{
+    duration_from_epochs, get_epoch_secs, parse_byte_size, ClientStats, TransferResult,
+};
 use rand::{distributions::Alphanumeric, seq::SliceRandom, Rng};
 use serde::{Deserialize, Serialize};
 
@@ -40,7 +42,7 @@ fn main(m: Mailbox<i32>) {
             nodes,
             opt,
         };
-        let p = spawn!(|args, mailbox: Mailbox<String>| spawn_and_ping_remote(args, mailbox));
+        let p = spawn!(|args, mailbox: Mailbox<Message>| spawn_and_ping_remote(args, mailbox));
         processes.push(p);
     }
 
@@ -49,7 +51,7 @@ fn main(m: Mailbox<i32>) {
     }
 
     for p in processes {
-        p.send("".to_string());
+        p.send(Message::String("".to_string()));
         m.receive();
     }
 }
@@ -62,8 +64,14 @@ struct Args {
     opt: Opt,
 }
 
+#[derive(Serialize, Deserialize)]
+enum Message {
+    String(String),
+    Empty(f64),
+}
+
 // local
-fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<String>) {
+fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
     let this = mailbox.this();
     let mut stats = ClientStats::default();
     let start = Instant::now();
@@ -76,9 +84,16 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<String>) {
                 .take(args.opt.message_size as usize)
                 .map(char::from)
                 .collect();
-            let start = Instant::now();
-            remote.send(data);
-            let upload_result = TransferResult::new(start.elapsed(), args.opt.message_size as u64);
+            let start = get_epoch_secs();
+            remote.send(Message::String(data));
+            let end = match mailbox.receive() {
+                Message::Empty(end) => Some(end),
+                _ => None,
+            };
+            let upload_result = TransferResult::new(
+                duration_from_epochs(start, end.unwrap()),
+                args.opt.message_size as u64,
+            );
 
             let start = Instant::now();
             let _ = mailbox.receive();
@@ -98,9 +113,11 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<String>) {
 }
 
 // remote
-fn pong(parent: Process<String>, mailbox: Mailbox<String>) {
+fn pong(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
+        let t = get_epoch_secs();
+        parent.send(Message::Empty(t));
         parent.send(v);
     }
 }

@@ -2,8 +2,11 @@ use std::time::Instant;
 
 use clap::Parser;
 use lunatic::{Mailbox, Process};
-use lunatic_bench::{parse_byte_size, ClientStats, TransferResult};
+use lunatic_bench::{
+    duration_from_epochs, get_epoch_secs, parse_byte_size, ClientStats, TransferResult,
+};
 use rand::{distributions::Alphanumeric, Rng};
+use serde::{Deserialize, Serialize};
 
 #[derive(Parser, Debug, Clone, Copy)]
 #[clap(name = "bulk")]
@@ -19,8 +22,14 @@ pub struct Opt {
     pub requests: u64,
 }
 
+#[derive(Serialize, Deserialize)]
+enum Message {
+    String(String),
+    Empty(f64),
+}
+
 #[lunatic::main]
-fn main(mailbox: Mailbox<String>) {
+fn main(mailbox: Mailbox<Message>) {
     let opt = Opt::parse();
 
     let nodes = lunatic::distributed::nodes();
@@ -36,9 +45,14 @@ fn main(mailbox: Mailbox<String>) {
             .take(opt.message_size as usize)
             .map(char::from)
             .collect();
-        let start = Instant::now();
-        remote.send(data);
-        let upload_result = TransferResult::new(start.elapsed(), opt.message_size);
+        let start = get_epoch_secs();
+        remote.send(Message::String(data));
+        let end = match mailbox.receive() {
+            Message::Empty(end) => Some(end),
+            _ => None,
+        };
+        let upload_result =
+            TransferResult::new(duration_from_epochs(start, end.unwrap()), opt.message_size);
 
         let start = Instant::now();
         let _ = mailbox.receive();
@@ -52,9 +66,11 @@ fn main(mailbox: Mailbox<String>) {
     stats.print(0);
 }
 
-fn hello(parent: Process<String>, mailbox: Mailbox<String>) {
+fn hello(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
+        let t2 = get_epoch_secs();
+        parent.send(Message::Empty(t2));
         parent.send(v);
     }
 }
