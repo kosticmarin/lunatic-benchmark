@@ -16,7 +16,7 @@ There are two command line arguments:
 Run example
 
 ```
-./bench.sh 1 single --message-size 1k --requests 1024
+ ./bench.sh 1 single --message-size 500k --requests 1024
 ```
 
 Output
@@ -25,32 +25,32 @@ Output
 Client 0 stats:
 Overall upload stats:
 
-Transferred    1.00 MiB in 1024 messages in 124.94ms (8.00 MiB/s)
+Transferred  500.00 MiB in 1024 messages in 16.28s (30.72 MiB/s)
 
 Message upload metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │  142.46 MiB/s │    0.00ns
- P0   │   19.91 MiB/s │    0.00ns
- P10  │  113.87 MiB/s │    0.00ns
- P50  │  146.62 MiB/s │    0.00ns
- P90  │  163.62 MiB/s │    0.00ns
- P100 │  258.75 MiB/s │    0.00ns
+ AVG  │  152.83 MiB/s │    2.00ms
+ P0   │   84.94 MiB/s │    2.00ms
+ P10  │  118.94 MiB/s │    2.00ms
+ P50  │  147.75 MiB/s │    3.00ms
+ P90  │  194.87 MiB/s │    4.00ms
+ P100 │  225.12 MiB/s │    5.00ms
 Overall download stats:
 
-Transferred    1.00 MiB in 1024 messages in 124.94ms (8.00 MiB/s)
+Transferred  500.00 MiB in 1024 messages in 16.28s (30.72 MiB/s)
 
 Message download metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │   11.33 MiB/s │    0.00ns
- P0   │    1.10 MiB/s │    0.00ns
- P10  │    9.31 MiB/s │    0.00ns
- P50  │   11.48 MiB/s │    0.00ns
- P90  │   13.01 MiB/s │    0.00ns
- P100 │   18.53 MiB/s │    0.00ns
+ AVG  │  339.33 MiB/s │    1.00ms
+ P0   │  113.25 MiB/s │    0.00ns
+ P10  │  225.87 MiB/s │    1.00ms
+ P50  │  300.25 MiB/s │    1.00ms
+ P90  │  460.00 MiB/s │    2.00ms
+ P100 │  695.00 MiB/s │    4.00ms
 ```
 
 ## Multiple
@@ -62,7 +62,7 @@ Note: each client talks to all distributed nodes in a random order.
 Run example:
 
 ```
-./bench.sh 10 multiple --clients 2 --message-size 1k --requests 1024
+./bench.sh 10 multiple --clients 2 --message-size 500k --requests 1024
 ```
 
 Output
@@ -71,60 +71,60 @@ Output
 Client 0 stats:
 Overall upload stats:
 
-Transferred    1.00 MiB in 1025 messages in 335.13ms (2.99 MiB/s)
+Transferred  500.49 MiB in 1025 messages in 15.78s (31.72 MiB/s)
 
 Message upload metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │  139.44 MiB/s │    0.00ns
- P0   │   27.69 MiB/s │    0.00ns
- P10  │   90.19 MiB/s │    0.00ns
- P50  │  135.75 MiB/s │    0.00ns
- P90  │  201.00 MiB/s │    0.00ns
- P100 │  286.00 MiB/s │    0.00ns
+ AVG  │  150.74 MiB/s │    2.00ms
+ P0   │   66.81 MiB/s │    2.00ms
+ P10  │  116.06 MiB/s │    2.00ms
+ P50  │  150.12 MiB/s │    3.00ms
+ P90  │  184.87 MiB/s │    4.00ms
+ P100 │  227.12 MiB/s │    7.00ms
 Overall download stats:
 
-Transferred    1.00 MiB in 1025 messages in 335.13ms (2.99 MiB/s)
+Transferred  500.49 MiB in 1025 messages in 15.78s (31.72 MiB/s)
 
 Message download metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │   10.62 MiB/s │    0.00ns
- P0   │    0.80 MiB/s │    0.00ns
- P10  │    7.81 MiB/s │    0.00ns
- P50  │    9.95 MiB/s │    0.00ns
- P90  │   14.86 MiB/s │    0.00ns
- P100 │   19.59 MiB/s │    1.00ms
+ AVG  │  333.56 MiB/s │    1.00ms
+ P0   │   16.08 MiB/s │    0.00ns
+ P10  │  195.50 MiB/s │    0.00ns
+ P50  │  300.50 MiB/s │    1.00ms
+ P90  │  548.50 MiB/s │    2.00ms
+ P100 │ 2626.00 MiB/s │   30.00ms
 
 Client 1 stats:
 Overall upload stats:
 
-Transferred    1.00 MiB in 1025 messages in 335.61ms (2.98 MiB/s)
+Transferred  500.49 MiB in 1025 messages in 15.85s (31.58 MiB/s)
 
 Message upload metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │  139.25 MiB/s │    0.00ns
- P0   │   39.62 MiB/s │    0.00ns
- P10  │   89.31 MiB/s │    0.00ns
- P50  │  132.00 MiB/s │    0.00ns
- P90  │  206.12 MiB/s │    0.00ns
- P100 │  334.00 MiB/s │    0.00ns
+ AVG  │  152.58 MiB/s │    2.00ms
+ P0   │   82.88 MiB/s │    2.00ms
+ P10  │  115.75 MiB/s │    2.00ms
+ P50  │  151.75 MiB/s │    3.00ms
+ P90  │  188.87 MiB/s │    4.00ms
+ P100 │  219.25 MiB/s │    5.00ms
 Overall download stats:
 
-Transferred    1.00 MiB in 1025 messages in 335.61ms (2.98 MiB/s)
+Transferred  500.49 MiB in 1025 messages in 15.85s (31.58 MiB/s)
 
 Message download metrics:
 
       │  Throughput   │ Duration
 ──────┼───────────────┼──────────
- AVG  │   10.60 MiB/s │    0.00ns
- P0   │    0.66 MiB/s │    0.00ns
- P10  │    7.79 MiB/s │    0.00ns
- P50  │   10.05 MiB/s │    0.00ns
- P90  │   14.73 MiB/s │    0.00ns
- P100 │   19.20 MiB/s │    1.00ms
+ AVG  │  336.40 MiB/s │    1.00ms
+ P0   │   16.34 MiB/s │    0.00ns
+ P10  │  195.00 MiB/s │    0.00ns
+ P50  │  293.25 MiB/s │    1.00ms
+ P90  │  552.00 MiB/s │    2.00ms
+ P100 │ 3944.00 MiB/s │   29.00ms
 ```
