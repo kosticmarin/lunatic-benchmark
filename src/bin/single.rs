@@ -54,9 +54,14 @@ fn main(mailbox: Mailbox<Message>) {
         let upload_result =
             TransferResult::new(duration_from_epochs(start, end.unwrap()), opt.message_size);
 
-        let start = Instant::now();
+        let start = match mailbox.receive() {
+            Message::Empty(start) => Some(start),
+            _ => None,
+        };
         let _ = mailbox.receive();
-        let download_result = TransferResult::new(start.elapsed(), opt.message_size);
+        let end = get_epoch_secs();
+        let download_result =
+            TransferResult::new(duration_from_epochs(start.unwrap(), end), opt.message_size);
 
         stats.upload_stats.stream_finished(upload_result);
         stats.download_stats.stream_finished(download_result);
@@ -69,8 +74,10 @@ fn main(mailbox: Mailbox<Message>) {
 fn hello(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
-        let t2 = get_epoch_secs();
-        parent.send(Message::Empty(t2));
+        let end = get_epoch_secs();
+        parent.send(Message::Empty(end));
+        let start = get_epoch_secs();
+        parent.send(Message::Empty(start));
         parent.send(v);
     }
 }

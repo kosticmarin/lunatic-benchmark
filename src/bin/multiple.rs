@@ -95,10 +95,16 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
                 args.opt.message_size as u64,
             );
 
-            let start = Instant::now();
+            let start = match mailbox.receive() {
+                Message::Empty(start) => Some(start),
+                _ => None,
+            };
             let _ = mailbox.receive();
-            let download_result =
-                TransferResult::new(start.elapsed(), args.opt.message_size as u64);
+            let end = get_epoch_secs();
+            let download_result = TransferResult::new(
+                duration_from_epochs(start.unwrap(), end),
+                args.opt.message_size as u64,
+            );
 
             stats.upload_stats.stream_finished(upload_result);
             stats.download_stats.stream_finished(download_result);
