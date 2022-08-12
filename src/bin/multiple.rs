@@ -123,6 +123,7 @@ fn pong(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
         parent.send(Message::Empty);
+        parent.send(Message::Empty);
         parent.send(v);
     }
 }
