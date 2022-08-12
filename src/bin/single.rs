@@ -25,7 +25,7 @@ pub struct Opt {
 #[derive(Serialize, Deserialize)]
 enum Message {
     String(String),
-    Empty(f64),
+    Empty,
 }
 
 #[lunatic::main]
@@ -48,20 +48,24 @@ fn main(mailbox: Mailbox<Message>) {
         let start = get_epoch_secs();
         remote.send(Message::String(data));
         let end = match mailbox.receive() {
-            Message::Empty(end) => Some(end),
+            Message::Empty => Some(get_epoch_secs()),
             _ => None,
         };
-        let upload_result =
-            TransferResult::new(duration_from_epochs(start, end.unwrap()), opt.message_size);
+        let upload_result = TransferResult::new(
+            duration_from_epochs(start, end.expect("Invalid order of messages")),
+            opt.message_size,
+        );
 
         let start = match mailbox.receive() {
-            Message::Empty(start) => Some(start),
+            Message::Empty => Some(get_epoch_secs()),
             _ => None,
         };
         let _ = mailbox.receive();
         let end = get_epoch_secs();
-        let download_result =
-            TransferResult::new(duration_from_epochs(start.unwrap(), end), opt.message_size);
+        let download_result = TransferResult::new(
+            duration_from_epochs(start.expect("Invalid order of messages"), end),
+            opt.message_size,
+        );
 
         stats.upload_stats.stream_finished(upload_result);
         stats.download_stats.stream_finished(download_result);
@@ -74,10 +78,8 @@ fn main(mailbox: Mailbox<Message>) {
 fn hello(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
-        let end = get_epoch_secs();
-        parent.send(Message::Empty(end));
-        let start = get_epoch_secs();
-        parent.send(Message::Empty(start));
+        parent.send(Message::Empty);
+        parent.send(Message::Empty);
         parent.send(v);
     }
 }

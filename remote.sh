@@ -22,7 +22,7 @@ echo "Starting $1 no-entry clients"
 CLIENTS=$1
 for (( i=0; i<CLIENTS; i++));
 do
-    lunatic --control "$ADDR:10410" --node "127.0.0.1:1000$i" --test-ca --no-entry &
+    lunatic --control "$ADDR:10410" --node "$ADDR:1000$i" --test-ca --no-entry &
 done
 sleep 1
 

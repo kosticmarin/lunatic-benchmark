@@ -67,7 +67,7 @@ struct Args {
 #[derive(Serialize, Deserialize)]
 enum Message {
     String(String),
-    Empty(f64),
+    Empty,
 }
 
 // local
@@ -87,7 +87,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
             let start = get_epoch_secs();
             remote.send(Message::String(data));
             let end = match mailbox.receive() {
-                Message::Empty(end) => Some(end),
+                Message::Empty => Some(get_epoch_secs()),
                 _ => None,
             };
             let upload_result = TransferResult::new(
@@ -96,7 +96,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
             );
 
             let start = match mailbox.receive() {
-                Message::Empty(start) => Some(start),
+                Message::Empty => Some(get_epoch_secs()),
                 _ => None,
             };
             let _ = mailbox.receive();
@@ -122,8 +122,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
 fn pong(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
-        let t = get_epoch_secs();
-        parent.send(Message::Empty(t));
+        parent.send(Message::Empty);
         parent.send(v);
     }
 }
