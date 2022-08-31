@@ -39,12 +39,18 @@ fn main(mailbox: Mailbox<Message>) {
 
     let mut stats = ClientStats::default();
     let start = Instant::now();
-    for _ in 0..opt.requests {
-        let data: String = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(opt.message_size as usize)
-            .map(char::from)
-            .collect();
+
+    let messages: Vec<String> = (0..opt.requests)
+        .map(|_| {
+            rand::thread_rng()
+                .sample_iter(&Alphanumeric)
+                .take(opt.message_size as usize)
+                .map(char::from)
+                .collect()
+        })
+        .collect();
+
+    for data in messages {
         let start = get_epoch_secs();
         remote.send(Message::String(data));
         let end = match mailbox.receive() {

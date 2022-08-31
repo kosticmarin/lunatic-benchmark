@@ -76,16 +76,22 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
     let mut stats = ClientStats::default();
     let start = Instant::now();
     let mut rng = rand::thread_rng();
-    args.nodes.choose(&mut rng).into_iter().for_each(|node| {
-        let remote = Process::spawn_node(*node, this.clone(), pong);
-        for _ in 0..=args.opt.requests {
-            let data: String = rand::thread_rng()
+
+    let messages: Vec<String> = (0..args.opt.requests)
+        .map(|_| {
+            rand::thread_rng()
                 .sample_iter(&Alphanumeric)
                 .take(args.opt.message_size as usize)
                 .map(char::from)
-                .collect();
+                .collect()
+        })
+        .collect();
+
+    args.nodes.choose(&mut rng).into_iter().for_each(|node| {
+        let remote = Process::spawn_node(*node, this.clone(), pong);
+        for data in &messages {
             let start = get_epoch_secs();
-            remote.send(Message::String(data));
+            remote.send(Message::String(data.clone()));
             let end = match mailbox.receive() {
                 Message::Empty => Some(get_epoch_secs()),
                 _ => None,
