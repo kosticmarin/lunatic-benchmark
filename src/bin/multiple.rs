@@ -18,10 +18,10 @@ pub struct Opt {
     ///
     /// This can use SI prefixes for sizes. E.g. 1M will transfer 1MiB, 10GiB
     /// will transfer 10GiB.
-    #[clap(long, default_value = "1k", parse(try_from_str = parse_byte_size))]
+    #[clap(long, default_value = "250k", parse(try_from_str = parse_byte_size))]
     pub message_size: u64,
     /// Number of requests to make from node to node
-    #[clap(long, default_value = "1000")]
+    #[clap(long, default_value = "10")]
     pub requests: u64,
 }
 

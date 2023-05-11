@@ -15,10 +15,10 @@ pub struct Opt {
     ///
     /// This can use SI prefixes for sizes. E.g. 1M will transfer 1MiB, 10GiB
     /// will transfer 10GiB.
-    #[clap(long, default_value = "1k", parse(try_from_str = parse_byte_size))]
+    #[clap(long, default_value = "250k", parse(try_from_str = parse_byte_size))]
     pub message_size: u64,
     /// Number of requests to make from node to node
-    #[clap(long, default_value = "1000")]
+    #[clap(long, default_value = "10")]
     pub requests: u64,
 }
 
@@ -40,19 +40,15 @@ fn main(mailbox: Mailbox<Message>) {
     let mut stats = ClientStats::default();
     let start = Instant::now();
 
-    let messages: Vec<String> = (0..opt.requests)
-        .map(|_| {
-            rand::thread_rng()
-                .sample_iter(&Alphanumeric)
-                .take(opt.message_size as usize)
-                .map(char::from)
-                .collect()
-        })
-        .collect();
-
-    for data in messages {
+    for i in 0..opt.requests {
+        println!("MAIN sending msg {i}");
+        let data: String = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(opt.message_size as usize)
+            .map(char::from)
+            .collect();
         let start = get_epoch_secs();
-        remote.send(Message::String(data));
+        remote.send(Message::String(data.clone()));
         let end = match mailbox.receive() {
             Message::Empty => Some(get_epoch_secs()),
             _ => None,
@@ -66,7 +62,10 @@ fn main(mailbox: Mailbox<Message>) {
             Message::Empty => Some(get_epoch_secs()),
             _ => None,
         };
-        let _ = mailbox.receive();
+        let msg = mailbox.receive();
+        if let Message::String(s) = msg {
+            assert_eq!(s, data);
+        }
         let end = get_epoch_secs();
         let download_result = TransferResult::new(
             duration_from_epochs(start.expect("Invalid order of messages"), end),
@@ -84,6 +83,7 @@ fn main(mailbox: Mailbox<Message>) {
 fn hello(parent: Process<Message>, mailbox: Mailbox<Message>) {
     loop {
         let v = mailbox.receive();
+        println!("REMOTE recv msg");
         parent.send(Message::Empty);
         parent.send(Message::Empty);
         parent.send(v);
