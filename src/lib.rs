@@ -34,7 +34,7 @@ impl Stats {
             self.total_size as f64 / 1024.0 / 1024.0,
             self.streams,
             self.total_duration,
-            throughput_bps(self.total_duration, self.total_size as u64) / 1024.0 / 1024.0
+            throughput_bps(self.total_duration, self.total_size) / 1024.0 / 1024.0
         );
 
         println!("Message {} metrics:\n", stat_name);

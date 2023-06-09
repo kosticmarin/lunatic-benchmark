@@ -12,16 +12,16 @@ use serde::{Deserialize, Serialize};
 #[clap(name = "bulk")]
 pub struct Opt {
     /// Number of clients on a local node to spawn
-    #[clap(long, default_value = "2")]
+    #[clap(long, default_value = "1")]
     pub clients: i32,
     /// Number of bytes to transmit from node to node
     ///
     /// This can use SI prefixes for sizes. E.g. 1M will transfer 1MiB, 10GiB
     /// will transfer 10GiB.
-    #[clap(long, default_value = "250k", parse(try_from_str = parse_byte_size))]
+    #[clap(long, default_value = "1M", parse(try_from_str = parse_byte_size))]
     pub message_size: u64,
     /// Number of requests to make from node to node
-    #[clap(long, default_value = "10")]
+    #[clap(long, default_value = "100")]
     pub requests: u64,
 }
 
@@ -35,7 +35,7 @@ fn main(m: Mailbox<i32>) {
     let mut processes = vec![];
     for i in 0..opt.clients {
         let nodes = nodes.clone();
-        let parent = this.clone();
+        let parent = this;
         let args = Args {
             client_id: i,
             parent,
@@ -88,7 +88,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
         .collect();
 
     args.nodes.choose(&mut rng).into_iter().for_each(|node| {
-        let remote = Process::spawn_node(*node, this.clone(), pong);
+        let remote = Process::spawn_node(*node, this, pong);
         for data in &messages {
             let start = get_epoch_secs();
             remote.send(Message::String(data.clone()));
@@ -98,7 +98,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
             };
             let upload_result = TransferResult::new(
                 duration_from_epochs(start, end.unwrap()),
-                args.opt.message_size as u64,
+                args.opt.message_size,
             );
 
             let start = match mailbox.receive() {
@@ -109,7 +109,7 @@ fn spawn_and_ping_remote(args: Args, mailbox: Mailbox<Message>) {
             let end = get_epoch_secs();
             let download_result = TransferResult::new(
                 duration_from_epochs(start.unwrap(), end),
-                args.opt.message_size as u64,
+                args.opt.message_size,
             );
 
             stats.upload_stats.stream_finished(upload_result);

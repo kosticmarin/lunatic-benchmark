@@ -12,6 +12,7 @@ trap trap_ctrlc SIGHUP SIGINT SIGTERM
 
 cargo b --release
 
+export RUST_LOG=lunatic=info
 # export RUST_LOG=lunatic=trace
 echo "Starting control node"
 lunatic control --bind-socket 127.0.0.1:10410 &
